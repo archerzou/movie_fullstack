@@ -1,7 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
+using Microsoft.EntityFrameworkCore;
+using MoviesAPI.DTOs;
 using MoviesAPI.Entities;
-using System.Threading.Tasks;
+using MoviesAPI.Utilities;
 
 namespace MoviesAPI.Controllers
 {
@@ -10,50 +14,91 @@ namespace MoviesAPI.Controllers
     public class GenresController: ControllerBase
     {
         private readonly IOutputCacheStore outputCacheStore;
+        private readonly ApplicationDbContext context;
+        private readonly IMapper mapper;
         private const string cacheTag = "genres";
 
 
-        public GenresController(IOutputCacheStore outputCacheStore)
+        public GenresController(IOutputCacheStore outputCacheStore, ApplicationDbContext context, IMapper mapper)
         {
             this.outputCacheStore = outputCacheStore;
+            this.context = context;
+            this.mapper = mapper;
         }
 
-        [HttpGet]
+        [HttpGet] // api/genres
         [OutputCache(Tags = [cacheTag])]
-        public List<Genre> Get()
+        public async Task<List<GenreDTO>> Get([FromQuery] PaginationDTO pagination)
         {
-            return new List<Genre>
+            var queryable = context.Genres;
+            await HttpContext.InsertPaginationParametersInHeader(queryable);
+            return await queryable
+                .OrderBy(g => g.Name)
+                .Paginate(pagination)
+                .ProjectTo<GenreDTO>(mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
+
+        [HttpGet("{id:int}", Name = "GetGenreById")] // api/genres/500
+        [OutputCache(Tags = [cacheTag])]
+        public async Task<ActionResult<GenreDTO>> Get(int id)
+        {
+            var genre = await context.Genres
+                        .ProjectTo<GenreDTO>(mapper.ConfigurationProvider)
+                        .FirstOrDefaultAsync(g => g.Id == id);
+            if (genre == null)
             {
-                new Genre{ Id=1, Name="Drama"},
-                new Genre{ Id=2, Name="Action"}
-            };
-        }
+                return NotFound();
+            }
 
-        [HttpGet("{id:int}")]
-        [OutputCache(Tags = [cacheTag])]
-        public async Task<ActionResult<Genre>> Get(int id)
-        {
-            throw new NotImplementedException();
+            return genre;
         }
 
 
         [HttpPost]
-        public async Task<ActionResult<Genre>> Post([FromBody] Genre genre)
+        public async Task<CreatedAtRouteResult> Post([FromBody] GenreCreationDTO genreCreationDTO)
         {
+            var genre = mapper.Map<Genre>(genreCreationDTO);
+            context.Add(genre);
+            await context.SaveChangesAsync();
             await outputCacheStore.EvictByTagAsync(cacheTag, default);
-            throw new NotImplementedException();
+            var genreDTO = mapper.Map<GenreDTO>(genre);
+            return CreatedAtRoute("GetGenreById", new { id = genre.Id }, genreDTO);
         }
 
-        [HttpPut]
-        public void Put()
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Put(int id, [FromBody] GenreCreationDTO genreCreationDTO)
         {
+            var genreExists = await context.Genres.AnyAsync(g => g.Id == id);
+            if (!genreExists)
+            {
+                return NotFound();
+            }
 
+            var genre = mapper.Map<Genre>(genreCreationDTO);
+            genre.Id = id;
+
+            context.Update(genre);
+            await context.SaveChangesAsync();
+            await outputCacheStore.EvictByTagAsync(cacheTag, default);
+
+            return NoContent();
         }
 
-        [HttpDelete]
-        public void Delete()
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
         {
+            var deletedRecords = await context.Genres
+                .Where(g => g.Id == id)
+                .ExecuteDeleteAsync();
 
+            if (deletedRecords == 0)
+            {
+                return NotFound();
+            }
+            
+            await outputCacheStore.EvictByTagAsync(cacheTag, default);
+            return NoContent();
         }
     }
 }
