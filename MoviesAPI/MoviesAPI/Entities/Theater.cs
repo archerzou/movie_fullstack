@@ -1,15 +1,15 @@
 ﻿using MoviesAPI.DTOs;
-using MoviesAPI.Validations;
+using NetTopologySuite.Geometries;
 using System.ComponentModel.DataAnnotations;
 
 namespace MoviesAPI.Entities
 {
-    public class Genre: IId
+    public class Theater : IId
     {
         public int Id { get; set; }
-        [Required(ErrorMessage ="You must fill the {0} field")]
-        [StringLength(maximumLength:50)]
-        [FirstLetterUppercase]
+        [Required]
+        [StringLength(75)]
         public required string Name { get; set; }
+        public required Point Location { get; set; }
     }
 }

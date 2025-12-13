@@ -1,31 +1,49 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router"
+import {useNavigate, useParams} from "react-router"
 import type ActorCreation from "../models/ActorCreation";
 import ActorForm from "./ActorForm";
 import Loading from "../../../components/Loading";
 import type { SubmitHandler } from "react-hook-form";
+import apiClient from "../../../api/apiClient.ts";
+import type Actor from "../models/Actor.model.ts";
+import formatDate from "../../../utils/formatDate.ts";
+import extractErrors from "../../../utils/extractErrors.ts";
+import type {AxiosError} from "axios";
 
 const EditActor = () => {
     const { id } = useParams();
     const [model, setModel] = useState<ActorCreation | undefined>(undefined)
+    const [errors, setErrors] = useState<string[]>([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const timerId = setTimeout(() => {
-            setModel({ name: 'Tom Holland', dateOfBirth: '2022-11-23', picture: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Tom_Holland_by_Gage_Skidmore.jpg/800px-Tom_Holland_by_Gage_Skidmore.jpg' });
-        }, 1000);
+        apiClient.get<Actor>(`/actors/${id}`).then(res => {
+            const actor = res.data;
+            const actorCreation: ActorCreation = {
+                name: actor.name,
+                dateOfBirth: formatDate(actor.dateOfBirth),
+                picture: actor.picture
+            }
 
-        return () => clearTimeout(timerId);
+            setModel(actorCreation);
+
+        })
     }, [id])
 
     const onSubmit: SubmitHandler<ActorCreation> = async (data) => {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        console.log(data);
+        try {
+            await apiClient.putForm(`/actors/${id}`, data);
+            navigate('/actors');
+        } catch(err){
+            const errors = extractErrors(err as AxiosError);
+            setErrors(errors);
+        }
     }
 
     return (
         <>
             <h3>Edit Actor</h3>
-            {model ? <ActorForm onSubmit={onSubmit} model={model} /> : <Loading />}
+            {model ? <ActorForm errors={errors} onSubmit={onSubmit} model={model} /> : <Loading />}
         </>
     )
 };
