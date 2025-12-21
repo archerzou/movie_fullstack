@@ -1,7 +1,9 @@
 import { useForm, type SubmitHandler } from "react-hook-form"
 import type FilterMoviesDTO from "../models/FilterMoviesDTO.model.ts";
-import type Genre from "../../genres/models/Genre.model";
 import Button from "../../../components/Button";
+import {useFilterMovies} from "../hooks/useFilterMovies.ts";
+import MoviesList from "./MoviesList.tsx";
+import Pagination from "../../../components/Pagination.tsx";
 
 const FilterMovies = () => {
     const initialValues: FilterMoviesDTO = {
@@ -11,16 +13,16 @@ const FilterMovies = () => {
         upcomingReleases: false
     }
 
-    const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm<FilterMoviesDTO>({
+    const { register, handleSubmit, reset, setValue, formState: { isSubmitting } } = useForm<FilterMoviesDTO>({
         defaultValues: initialValues
     })
 
     const onSubmit: SubmitHandler<FilterMoviesDTO> = async (data) => {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        console.log(data);
+        await useFilterMoviesHook.loadRecords(data);
     }
 
-    const genres: Genre[] = [{ id: 1, name: 'Action' }, { id: 2, name: 'Comedy' }];
+    const useFilterMoviesHook = useFilterMovies(initialValues, setValue);
+
 
     return (
         <>
@@ -35,7 +37,8 @@ const FilterMovies = () => {
                 <div className="col-12">
                     <select className="form-select" {...register('genreId')}>
                         <option value="0">--Select a genre--</option>
-                        {genres.map(genre => <option key={genre.id} value={genre.id}>{genre.name}</option>)}
+                        {useFilterMoviesHook.genres.map(genre => <option
+                            key={genre.id} value={genre.id}>{genre.name}</option>)}
                     </select>
                 </div>
                 <div className="col-12">
@@ -62,14 +65,33 @@ const FilterMovies = () => {
                     <Button type="submit" disabled={isSubmitting}>
                         {isSubmitting ? 'Filtering...' : 'Filter'}
                     </Button>
-                    <Button className="btn btn-danger ms-2" onClick={() => reset()}>
+                    <Button className="btn btn-danger ms-2" onClick={() => {
+                        reset();
+                        useFilterMoviesHook.loadRecords(initialValues);
+                    }}>
                         Reset
                     </Button>
                 </div>
 
             </form>
+
+            <div className="mt-4">
+                <Pagination currentPage={useFilterMoviesHook.page}
+                            recordsPerPage={useFilterMoviesHook.recordsPerPage}
+                            totalAmountOfRecords={useFilterMoviesHook.totalAmountOfRecords}
+                            recordsPerPageOptions={[5, 20, 50]}
+                            onPaginateChange={(page, recordsPerPage) => {
+                                useFilterMoviesHook.setPage(page);
+                                useFilterMoviesHook.setRecordsPerPage(recordsPerPage)
+                            }}
+                />
+            </div>
+
+            <div className="mt-4">
+                <MoviesList movies={useFilterMoviesHook.movies} />
+            </div>
         </>
-    );
+    )
 };
 
 export default FilterMovies;

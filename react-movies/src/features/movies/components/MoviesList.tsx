@@ -7,6 +7,7 @@ export default function MoviesList(props: MoviesListProps) {
 
     return (
         <GenericList list={props.movies}
+
                      emptyListUI={<>there are no movies to display</>}
         >
             <div className={styles.div}>

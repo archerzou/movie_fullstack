@@ -1,11 +1,33 @@
-import {NavLink} from "react-router";
+import {useEntities} from "../../../hooks/useEntities.ts";
+import IndexEntities from "../../../components/IndexEntities.tsx";
+import type Theater from "../models/Theater.model.ts";
 
 const IndexTheaters = () => {
+    const theatersHook = useEntities<Theater>('/theaters');
+
     return (
         <>
-            <h3>Theaters</h3>
-            <NavLink to="/theaters/create" className="btn btn-primary">
-                Create Theater</NavLink>
+            <IndexEntities<Theater> title="Theater" url="/theaters" urlCreate="/theaters/create" entity="Theater"
+                                    {...theatersHook} >
+                {(entities, buildButtons) => <>
+
+                    <thead className="table-light">
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col" className="text-end">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {entities?.map(theater => <tr key={theater.id}>
+                        <td>{theater.name}</td>
+                        <td className="text-end">
+                            {buildButtons(`/theaters/edit/${theater.id}`, theater.id)}
+                        </td>
+                    </tr>)}
+                    </tbody>
+
+                </>}
+            </IndexEntities>
         </>
     )
 };

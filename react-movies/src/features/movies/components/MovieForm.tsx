@@ -12,6 +12,8 @@ import MultipleSelection from "../../../components/MultipleSelection/MultipleSel
 import type Theater from "../../theaters/models/Theater.model";
 import TypeaheadActors from "./TypeaheadActors";
 import type MovieActor from "../models/MovieActor.model";
+import DisplayErrors from "../../../components/DisplayErrors.tsx";
+
 
 export default function MovieForm(props: MovieFormProps) {
 
@@ -50,6 +52,7 @@ export default function MovieForm(props: MovieFormProps) {
 
     return (
         <>
+            <DisplayErrors errors={props.errors} />
             <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="form-group">
                     <label htmlFor="title">Title</label>
@@ -133,6 +136,7 @@ interface MovieFormProps {
     nonSelectedTheaters: Theater[];
     selectedTheaters: Theater[];
     selectedActors: MovieActor[];
+    errors: string[];
 }
 
 const validationRules = yup.object({

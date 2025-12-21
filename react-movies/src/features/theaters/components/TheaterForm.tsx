@@ -7,6 +7,7 @@ import Button from "../../../components/Button";
 import { NavLink } from "react-router";
 import Map from "../../../components/Map/Map";
 import type Coordinate from "../../../components/Map/coordinate.model";
+import DisplayErrors from "../../../components/DisplayErrors.tsx";
 
 export default function TheaterForm(props: TheaterFormProps){
 
@@ -33,6 +34,7 @@ export default function TheaterForm(props: TheaterFormProps){
 
     return (
         <>
+            <DisplayErrors errors={props.errors} />
             <form onSubmit={handleSubmit(props.onSubmit)}>
                 <div className="form-group">
                     <label htmlFor="name">Name</label>
@@ -43,7 +45,7 @@ export default function TheaterForm(props: TheaterFormProps){
                 </div>
 
                 <div className="mt-4">
-                    <Map coordinates={transformCoordinate()} setCoordinate={coordinate => {
+                    <Map allowClicks={true} coordinates={transformCoordinate()} setCoordinate={coordinate => {
                         setValue('latitude', coordinate.lat, {
                             shouldValidate: true
                         })
@@ -69,6 +71,7 @@ export default function TheaterForm(props: TheaterFormProps){
 interface TheaterFormProps {
     model?: TheaterCreation;
     onSubmit: SubmitHandler<TheaterCreation>
+    errors: string[];
 }
 
 const validationRules = yup.object({

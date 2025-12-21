@@ -46,9 +46,9 @@ builder.Services.AddSingleton(provider =>
                    config.AddProfile(new AutoMapperProfiles(geometryFactory));
                }).CreateMapper());
 
-builder.Services.AddTransient<IFileStorage, AzureFileStorage>();
+//builder.Services.AddTransient<IFileStorage, AzureFileStorage>();
 
-//builder.Services.AddTransient<IFileStorage, LocalFileStorage>();
+builder.Services.AddTransient<IFileStorage, LocalFileStorage>();
 
 var app = builder.Build();
 

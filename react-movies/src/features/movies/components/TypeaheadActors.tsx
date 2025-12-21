@@ -1,19 +1,24 @@
-import { Typeahead } from "react-bootstrap-typeahead";
+import { AsyncTypeahead } from "react-bootstrap-typeahead";
 import type MovieActor from "../models/MovieActor.model";
 import type { Option } from "react-bootstrap-typeahead/types/types";
 import { useState } from "react";
+import apiClient from "../../../api/apiClient.ts";
 
 export default function TypeaheadActors(props: TypeaheadActorsProps){
 
-    const actors: MovieActor[] = [
-        {id: 1, name: 'Tom Holland', character: '', picture: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Tom_Holland_by_Gage_Skidmore.jpg/800px-Tom_Holland_by_Gage_Skidmore.jpg'},
-        {id: 2, name: 'Samuel L. Jackson', character: '', picture: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/SamuelLJackson.jpg/800px-SamuelLJackson.jpg'},
-        {id: 3, name: 'Marisa Tomei', character: '', picture: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Marisa_Tomei_at_Berlinale_2023.jpg/800px-Marisa_Tomei_at_Berlinale_2023.jpg'}
-    ]
-
     const selection: MovieActor[] = [];
-
     const [draggedElement, setDraggedElement] = useState<MovieActor | undefined>(undefined);
+    const [loading, setLoading] = useState(false);
+    const [actors, setActors] = useState<MovieActor[]>([]);
+
+    function handleSearch(query: string){
+        setLoading(true);
+
+        apiClient.get<MovieActor[]>(`/actors/${query}`).then(res => {
+            setActors(res.data);
+            setLoading(false);
+        });
+    }
 
     function handleDragStart(actor: MovieActor){
         setDraggedElement(actor);
@@ -35,8 +40,9 @@ export default function TypeaheadActors(props: TypeaheadActorsProps){
     return (
         <>
             <label>Actors</label>
-            <Typeahead
-
+            <AsyncTypeahead
+                isLoading={loading}
+                onSearch={handleSearch}
                 onChange={(actors: Option[]) => {
                     const selectedActor = actors[0] as MovieActor;
                     if (props.actors.findIndex(ca => ca.id === selectedActor.id) === -1){
