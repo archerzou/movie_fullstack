@@ -55,7 +55,7 @@ const MovieDetail = () => {
 
                 <div className="d-flex">
                     <span className="d-inline-block me-4">
-                        <img src={movie.poster} style={{ width: '225px', height: '315px' }} />
+                        <img alt={movie.title} src={movie.poster} style={{ width: '225px', height: '315px' }} />
                     </span>
                     <div>
                         <iframe width="565" height="315" title="trailer" allowFullScreen
