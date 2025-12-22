@@ -14,28 +14,34 @@ import CreateTheater from "./features/theaters/components/CreateTheater.tsx";
 import EditTheater from "./features/theaters/components/EditTheater.tsx";
 import EditGenre from "./features/genres/components/EditGenre.tsx";
 import CreateGenre from "./features/genres/components/CreateGenre.tsx";
+import ProtectRoute from "./features/security/components/ProtectRoute.tsx";
 
 const AppRoutes = () => {
     return (
         <Routes>
             <Route path='/' element={<LandingPage />} />
 
-            <Route path='/genres' element={<IndexGenres />} />
-            <Route path='/genres/create' element={<CreateGenre /> } />
-            <Route path='/genres/edit/:id' element={<EditGenre /> } />
+                <Route element={<ProtectRoute claims={['isadmin']} />}>
+                        <Route path='/genres' element={<IndexGenres />} />
+                        <Route path='/genres/create' element={<CreateGenre />} />
+                        <Route path='/genres/edit/:id' element={<EditGenre />} />
 
-            <Route path='/actors' element={<IndexActors />} />
-            <Route path='/actors/create' element={<CreateActor /> } />
-            <Route path='/actors/edit/:id' element={<EditActor /> } />
+                        <Route path='/actors' element={<IndexActors />} />
+                        <Route path='/actors/create' element={<CreateActor />} />
+                        <Route path='/actors/edit/:id' element={<EditActor />} />
 
-            <Route path='/theaters' element={<IndexTheaters />} />
-            <Route path='/theaters/create' element={<CreateTheater /> } />
-            <Route path='/theaters/edit/:id' element={<EditTheater /> } />
+                        <Route path='/theaters' element={<IndexTheaters />} />
+                        <Route path='/theaters/create' element={<CreateTheater />} />
+                        <Route path='/theaters/edit/:id' element={<EditTheater />} />
 
-            <Route path='/movies/filter' element={<FilterMovies />} />
+                        <Route path='/movies/create' element={<CreateMovie />} />
+                        <Route path='/movies/edit/:id' element={<EditMovie />} />
+                        {/*<Route path="/users" element={<IndexUsers /> } />*/}
+                </Route>
+
+                <Route path='/movies/filter' element={<FilterMovies />} />
             <Route path='/movie/:id' element={<MovieDetail /> } />
-            <Route path='/movies/create' element={<CreateMovie />} />
-            <Route path='/movies/edit/:id' element={<EditMovie />} />
+
 
             <Route path='*' element={<HandleRouteNotFound />} />
 
