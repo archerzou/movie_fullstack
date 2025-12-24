@@ -30,7 +30,7 @@ export default function IndexEntities<T>(props: IndexEntitiesProps<T>) {
         <>
             <h3>{props.title}</h3>
             <div className="mb-2">
-                <NavLink to={props.urlCreate} className="btn btn-primary">Create {props.entity}</NavLink>
+                <NavLink to={props.urlCreate || ''} className="btn btn-primary">Create {props.entity}</NavLink>
             </div>
 
             {props.loading ? <Loading /> : <>
@@ -58,10 +58,10 @@ export default function IndexEntities<T>(props: IndexEntitiesProps<T>) {
 
 interface IndexEntitiesProps<T> {
     title: string;
-    entity: string;
+    entity?: string;
     entities?: T[];
-    url: string;
-    urlCreate: string;
+    url?: string;
+    urlCreate?: string;
     page: number;
     recordsPerPage: number;
     totalAmountOfRecords: number;

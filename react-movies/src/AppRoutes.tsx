@@ -15,6 +15,9 @@ import EditTheater from "./features/theaters/components/EditTheater.tsx";
 import EditGenre from "./features/genres/components/EditGenre.tsx";
 import CreateGenre from "./features/genres/components/CreateGenre.tsx";
 import ProtectRoute from "./features/security/components/ProtectRoute.tsx";
+import IndexUsers from "./features/security/components/IndexUsers.tsx";
+import Register from "./features/security/components/Register.tsx";
+import Login from "./features/security/components/Login.tsx";
 
 const AppRoutes = () => {
     return (
@@ -36,14 +39,14 @@ const AppRoutes = () => {
 
                         <Route path='/movies/create' element={<CreateMovie />} />
                         <Route path='/movies/edit/:id' element={<EditMovie />} />
-                        {/*<Route path="/users" element={<IndexUsers /> } />*/}
+                        <Route path="/users" element={<IndexUsers /> } />
                 </Route>
-
                 <Route path='/movies/filter' element={<FilterMovies />} />
-            <Route path='/movie/:id' element={<MovieDetail /> } />
+                <Route path='/movie/:id' element={<MovieDetail /> } />
+                <Route path="/register" element={<Register /> } />
+                <Route path="/login" element={<Login /> } />
 
-
-            <Route path='*' element={<HandleRouteNotFound />} />
+                <Route path='*' element={<HandleRouteNotFound />} />
 
         </Routes>
     );

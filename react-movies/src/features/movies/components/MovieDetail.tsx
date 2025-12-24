@@ -5,6 +5,10 @@ import apiClient from "../../../api/apiClient.ts";
 import Loading from "../../../components/Loading.tsx";
 import type Coordinate from "../../../components/Map/coordinate.model.ts";
 import Map from '../../../components/Map/Map';
+import Rating from "../../../components/Ratings/Rating.tsx";
+import Swal from "sweetalert2";
+import {userIsLoggedIn} from "../../security/utils/HandleJWT.ts";
+import type RatingCreation from "../../../components/Ratings/RatingCreation.model.ts";
 
 const MovieDetail = () => {
     const { id } = useParams();
@@ -37,6 +41,25 @@ const MovieDetail = () => {
         })
     }
 
+    async function handleVote(vote: number){
+
+        const isUserLoggedIn = userIsLoggedIn();
+
+        if (!isUserLoggedIn){
+            Swal.fire({icon: 'error', title: 'You have to login to vote'});
+            return;
+        }
+
+        try{
+            const data: RatingCreation = {movieId: Number(id), rate: vote};
+            await apiClient.post('/ratings', data);
+            Swal.fire({icon: 'success', title: 'Vote received'});
+        }
+        catch (err){
+            console.error(err);
+        }
+
+    }
 
     return (
         <>
@@ -51,7 +74,7 @@ const MovieDetail = () => {
                     </div>
                 )}
 
-                <p className="text-muted">Release date: {dateFormatted}</p>
+                <p className="text-muted">Release date: {dateFormatted} | Average rate: {movie.averageRate} | My Rating: <Rating onVote={handleVote} maxRating={5} selectedVote={movie.userVote} /> </p>
 
                 <div className="d-flex">
                     <span className="d-inline-block me-4">
