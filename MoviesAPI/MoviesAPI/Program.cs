@@ -86,6 +86,17 @@ builder.Services.AddTransient<IFileStorage, LocalFileStorage>();
 
 var app = builder.Build();
 
+// This code migrates the database on application startup.
+//using (var scope = app.Services.CreateScope())
+//{
+//    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+//    if (dbContext.Database.IsRelational())
+//    {
+//        dbContext.Database.Migrate();
+//    }
+//}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
